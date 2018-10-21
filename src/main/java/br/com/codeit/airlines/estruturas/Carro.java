@@ -3,8 +3,7 @@ package br.com.codeit.airlines.estruturas;
 import java.util.Arrays;
 import java.util.List;
 
-import br.com.codeit.airlines.personagem.Personagem;
-import br.com.codeit.airlines.personagem.TipoPersonagem;
+import br.com.codeit.airlines.tripulantes.TipoTripulante;
 
 public class Carro extends EstruturaMovel {
 
@@ -18,14 +17,13 @@ public class Carro extends EstruturaMovel {
 	}
 
 	@Override
-	protected int quantidadePersonagensSuportada() {
+	protected int getQuantidadeMaximaTripulantes() {
 		return 2;
 	}
 
 	@Override
-	protected List<Personagem> getPersonagensHabilitadosADirigir() {
-		return Arrays.asList(TipoPersonagem.PILOTO.getPersonagem(), TipoPersonagem.CHEFE_DE_SERVICO.getPersonagem(),
-				TipoPersonagem.POLICIAL.getPersonagem());
+	protected List<TipoTripulante> getTipoTripulantesHabilitadosADirigir() {
+		return Arrays.asList(TipoTripulante.PILOTO, TipoTripulante.CHEFE_DE_SERVICO, TipoTripulante.POLICIAL);
 	}
 
 }

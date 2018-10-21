@@ -5,11 +5,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import br.com.codeit.airlines.personagem.Personagem;
+import br.com.codeit.airlines.exceptions.RegraDirecaoVeiculoException;
+import br.com.codeit.airlines.tripulantes.TipoTripulante;
+import br.com.codeit.airlines.tripulantes.Tripulante;
 
 public abstract class EstruturaMovel extends Estrutura {
 
-	private Set<Personagem> ocupantes = new HashSet<Personagem>();
+	private Set<Tripulante> ocupantes = new HashSet<Tripulante>();
 
 	private EstruturaFisica localEstacionamento;
 
@@ -17,67 +19,81 @@ public abstract class EstruturaMovel extends Estrutura {
 		this.localEstacionamento = localEstacionamento;
 	}
 
-	protected abstract List<Personagem> getPersonagensHabilitadosADirigir();
+	protected abstract List<TipoTripulante> getTipoTripulantesHabilitadosADirigir();
 
-	public void adicionarOcupante(EstruturaFisica origem, Personagem personagem) {
-		if (personagem != null) {
-			validarQuantidadeOcupantes();
-			validarSeLocalDeEstacionamentoHeIgual(origem);
-			Personagem removido = origem.removerPersonagem(personagem);
+	public EstruturaFisica getLocalEstacionamento() {
+		return localEstacionamento;
+	}
+
+	public Set<Tripulante> getTripulantesDoLocalEstacionamento() {
+		return localEstacionamento.getTripulantes();
+	}
+
+	public void adicionarOcupanteDoLocalEstacionamento(TipoTripulante tipoTripulante) {
+		validarQuantidadeOcupantes();
+		Tripulante removido = localEstacionamento.removerTripulantePorTipo(tipoTripulante);
+		if (removido != null) {
 			ocupantes.add(removido);
 		}
 	}
 
-	public Set<Personagem> getOcupantes() {
+	public void removerOcupanteParaOLocalEstacionamento(TipoTripulante tipoTripulante) {
+		Tripulante tripulanteRemover = getTripulantePorTipo(tipoTripulante);
+		ocupantes.remove(tripulanteRemover);
+		localEstacionamento.adicionarTripulante(tripulanteRemover);
+	}
+
+	private Tripulante getTripulantePorTipo(TipoTripulante tipoTripulante) {
+		Tripulante tripulante = ocupantes.stream().filter(f -> f.getTipo().equals(tipoTripulante)).findAny()
+				.orElseThrow(() -> new IllegalArgumentException(String.format("Ocupante com %s não está no %s",
+						tipoTripulante.getDescricao(), getDescricaoEstrutura())));
+		return tripulante;
+	}
+
+	public Set<Tripulante> getOcupantes() {
 		return Collections.unmodifiableSet(this.ocupantes);
 	}
 
-	public void removerOcupante(Personagem personagem, EstruturaFisica destino) {
-		if (personagem != null) {
-			ocupantes.remove(personagem);
-			destino.adicionarPersonagem(personagem);
-		}
+	public void locomoverEDescerOcupantes(EstruturaFisica destino) {
+		validarSeLocalDestinoHeDiferenteDoLocalEstacionamento(destino);
+		validarSeUmDosOcupantesPodeDirigir();
+		validarRegrasTripulantesLocalOrigem();
+		validarRegrasTripulantesLocalDestino(destino);
+
+		ocupantes.stream().forEach(t -> destino.adicionarTripulante(t));
+		ocupantes.clear();
+		localEstacionamento = destino;
 	}
 
-	public void locomoverEDescerTodos(EstruturaFisica destino) {
-		if (!destino.equals(localEstacionamento)) {
-			validarSeUmDosOcupantesPodeDirigir();
-			validarRegrasPersonagensLocalOrigem();
-			validarRegrasPersonagensLocalDestino(destino);
+	private void validarSeLocalDestinoHeDiferenteDoLocalEstacionamento(EstruturaFisica destino) {
+		if (destino.equals(localEstacionamento)) {
+			throw new IllegalArgumentException("Local de estacionamento deve ser diferente do destino");
 		}
-		ocupantes.stream().forEach(p -> destino.adicionarPersonagem(p));
-		ocupantes.clear();
 	}
 
 	private void validarSeUmDosOcupantesPodeDirigir() {
-		if (!ocupantes.stream().filter(p -> getPersonagensHabilitadosADirigir().contains(p)).findAny().isPresent()) {
-			throw new IllegalStateException("Não é permitida a direção do veículo pelos ocupantes atuais");
+		if (!ocupantes.stream().filter(f -> getTipoTripulantesHabilitadosADirigir().contains(f.getTipo())).findAny()
+				.isPresent()) {
+			throw new RegraDirecaoVeiculoException();
 		}
 	}
 
-	private void validarRegrasPersonagensLocalOrigem() {
-		localEstacionamento.getPersonagens().stream()
-				.forEach(p -> p.validarPoliticasEmpresa(localEstacionamento.getPersonagens()));
+	private void validarRegrasTripulantesLocalOrigem() {
+		localEstacionamento.getTripulantes().stream()
+				.forEach(p -> p.getTipo().validar(localEstacionamento.getTripulantes()));
 	}
 
-	private void validarRegrasPersonagensLocalDestino(EstruturaFisica destino) {
-		Set<Personagem> personagensValidarDestino = new HashSet<>();
-		personagensValidarDestino.addAll(destino.getPersonagens());
-		personagensValidarDestino.addAll(ocupantes);
-		personagensValidarDestino.stream().forEach(p -> p.validarPoliticasEmpresa(personagensValidarDestino));
-	}
-
-	private void validarSeLocalDeEstacionamentoHeIgual(EstruturaFisica local) {
-		if (!localEstacionamento.equals(local)) {
-			throw new IllegalStateException(
-					"O Local informado para o embarque do ocupante não corresponde ao local de estacionamento.");
-		}
+	private void validarRegrasTripulantesLocalDestino(EstruturaFisica destino) {
+		Set<Tripulante> tripulantesValidarDestino = new HashSet<>();
+		tripulantesValidarDestino.addAll(destino.getTripulantes());
+		tripulantesValidarDestino.addAll(ocupantes);
+		tripulantesValidarDestino.stream().forEach(t -> t.getTipo().validar(tripulantesValidarDestino));
 	}
 
 	private void validarQuantidadeOcupantes() {
-		if (ocupantes.size() == quantidadePersonagensSuportada()) {
-			throw new IllegalStateException(String.format("Não é permitido mais de %d personagens no %s",
-					quantidadePersonagensSuportada(), getDescricaoEstrutura()));
+		if (ocupantes.size() == getQuantidadeMaximaTripulantes()) {
+			throw new IllegalStateException(String.format("Não é permitido mais de %d tripulantes no %s",
+					getQuantidadeMaximaTripulantes(), getDescricaoEstrutura()));
 		}
 	}
 

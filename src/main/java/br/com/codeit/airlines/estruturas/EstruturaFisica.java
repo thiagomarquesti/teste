@@ -4,41 +4,45 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
-import br.com.codeit.airlines.personagem.Personagem;
+import br.com.codeit.airlines.tripulantes.TipoTripulante;
+import br.com.codeit.airlines.tripulantes.Tripulante;
 
 public abstract class EstruturaFisica extends Estrutura {
 
-	private Set<Personagem> personagens = new HashSet<Personagem>();
+	private Set<Tripulante> tripulantes = new HashSet<Tripulante>();
 	
-	public void adicionarPersonagem(Personagem personagem) {
-		if (personagem != null) {
-			if (personagens.size() == quantidadePersonagensSuportada()) {
-				throw new IllegalStateException(String.format("Não é permitido mais de %d personagens no %s",
-						quantidadePersonagensSuportada(), getDescricaoEstrutura()));
+	public void adicionarTripulante(Tripulante tripulante) {
+		if (tripulante != null) {
+			if (tripulantes.size() == getQuantidadeMaximaTripulantes()) {
+				throw new IllegalStateException(String.format("Não é permitido mais de %d tripulantes no %s",
+						getQuantidadeMaximaTripulantes(), getDescricaoEstrutura()));
 			}
-			personagens.add(personagem);
+			tripulantes.add(tripulante);
 		}
 	}
+	
+	public Tripulante removerTripulantePorTipo(TipoTripulante tipoTripulante) {
+		Tripulante tripulante = tripulantes.stream().filter(f -> f.getTipo().equals(tipoTripulante)).findAny().orElse(null);
+		return removerTripulante(tripulante);
+	}
 
-	public Personagem removerPersonagem(Personagem personagem) {
-		if (personagem != null) {
-			if (!personagens.contains(personagem)) {
-				throw new IllegalStateException(String.format("personagem %s não se encontra no %s",
-						personagem.getNome(), getDescricaoEstrutura()));
+	public Tripulante removerTripulante(Tripulante tripulante) {
+		if (tripulante != null) {
+			if (!tripulantes.contains(tripulante)) {
+				throw new IllegalStateException(String.format("Tripulante %s não se encontra no %s",
+						tripulante.getTipo().getDescricao(), getDescricaoEstrutura()));
 			}
-			personagens.remove(personagem);
+			tripulantes.remove(tripulante);
 		}
-		return personagem;
+		return tripulante;
 	}
 	
-	public Set<Personagem> removerTodosOsPassageiros() {
-		Set<Personagem> personagensRemovidos = new HashSet<Personagem>();
-		personagensRemovidos.addAll(personagens);
-		personagens.clear();
-		return personagensRemovidos;
+	public Set<Tripulante> getTripulantes() {
+		return Collections.unmodifiableSet(tripulantes);
 	}
-
-	public Set<Personagem> getPersonagens() {
-		return Collections.unmodifiableSet(personagens);
+	
+	@Override
+	public String toString() {
+		return getDescricaoEstrutura() + "[tripulantes: " + tripulantes + "]";
 	}
 }

@@ -1,18 +1,19 @@
 package br.com.codeit.airlines.estruturas;
 
-import br.com.codeit.airlines.personagem.TipoPersonagem;
+import br.com.codeit.airlines.tripulantes.TipoTripulante;
+import br.com.codeit.airlines.tripulantes.Tripulante;
 
 public class Terminal extends EstruturaFisica {
-	
+
 	public Terminal() {
-		adicionarPersonagem(TipoPersonagem.PILOTO.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.OFICIAL1.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.OFICIAL2.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.CHEFE_DE_SERVICO.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.COMISSARIA1.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.COMISSARIA2.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.POLICIAL.getPersonagem());
-		adicionarPersonagem(TipoPersonagem.PRESIDIARIO.getPersonagem());
+		adicionarTripulante(new Tripulante(TipoTripulante.PILOTO));
+		adicionarTripulante(new Tripulante(TipoTripulante.OFICIAL1));
+		adicionarTripulante(new Tripulante(TipoTripulante.OFICIAL2));
+		adicionarTripulante(new Tripulante(TipoTripulante.CHEFE_DE_SERVICO));
+		adicionarTripulante(new Tripulante(TipoTripulante.COMISSARIA1));
+		adicionarTripulante(new Tripulante(TipoTripulante.COMISSARIA2));
+		adicionarTripulante(new Tripulante(TipoTripulante.POLICIAL));
+		adicionarTripulante(new Tripulante(TipoTripulante.PRESIDIARIO));
 	}
 
 	@Override
@@ -21,7 +22,7 @@ public class Terminal extends EstruturaFisica {
 	}
 
 	@Override
-	protected int quantidadePersonagensSuportada() {
+	protected int getQuantidadeMaximaTripulantes() {
 		return 8;
 	}
 }

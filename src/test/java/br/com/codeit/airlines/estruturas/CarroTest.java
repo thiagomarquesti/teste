@@ -2,37 +2,42 @@ package br.com.codeit.airlines.estruturas;
 
 import static org.junit.Assert.assertEquals;
 
-import java.util.Set;
-
 import org.junit.Test;
 
-import br.com.codeit.airlines.personagem.Personagem;
-import br.com.codeit.airlines.personagem.TipoPersonagem;
+import br.com.codeit.airlines.tripulantes.TipoTripulante;
 
 public class CarroTest {
 
 	@Test(expected = IllegalStateException.class)
 	public void devePermitirSomenteDoisPassageirosNoCarro() throws Exception {
-		Carro carro = new Carro();
-		carro.adicionarPersonagem(TipoPersonagem.PILOTO.getPersonagem());
-		carro.adicionarPersonagem(TipoPersonagem.OFICIAL1.getPersonagem());
-		carro.adicionarPersonagem(TipoPersonagem.OFICIAL2.getPersonagem());
+		Terminal terminal = new Terminal();
+		Carro carro = new Carro(terminal);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.PILOTO);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.OFICIAL1);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.OFICIAL2);
 	}
-	
+
 	@Test
 	public void naoDevePermitirAMesmaPessoaNoCarroDuasVezes() {
-		Carro carro = new Carro();
-		carro.adicionarPersonagem(TipoPersonagem.PILOTO.getPersonagem());
-		carro.adicionarPersonagem(TipoPersonagem.PILOTO.getPersonagem());
-		assertEquals(1, carro.getPersonagens().size());
+		Terminal terminal = new Terminal();
+		Carro carro = new Carro(terminal);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.PILOTO);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.PILOTO);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.PILOTO);
+		assertEquals(1, carro.getOcupantes().size());
 	}
-	
+
 	@Test
-	public void deveRemoverTodosPassageirosDoCarroRetornandoSuasReferencias() {
-		Carro carro = new Carro();
-		carro.adicionarPersonagem(TipoPersonagem.PILOTO.getPersonagem());
-		carro.adicionarPersonagem(TipoPersonagem.OFICIAL1.getPersonagem());
-		Set<Personagem> removidos = carro.removerTodosOsPassageiros();
-		assertEquals(2, removidos.size());
+	public void deveLocomoverDoisPassageirosDoTerminalParaOAviao() {
+		Terminal terminal = new Terminal();
+		Aviao aviao = new Aviao();
+		Carro carro = new Carro(terminal);
+		
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.POLICIAL);
+		carro.adicionarOcupanteDoLocalEstacionamento(TipoTripulante.PRESIDIARIO);
+		
+		carro.locomoverEDescerOcupantes(aviao);
+		
+		assertEquals(2, aviao.getTripulantes().size());
 	}
 }

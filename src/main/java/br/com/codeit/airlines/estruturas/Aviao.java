@@ -11,7 +11,7 @@ public class Aviao extends EstruturaFisica {
 	}
 
 	@Override
-	protected int quantidadePersonagensSuportada() {
+	protected int getQuantidadeMaximaTripulantes() {
 		return 8;
 	}
 	

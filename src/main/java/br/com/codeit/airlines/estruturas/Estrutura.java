@@ -4,6 +4,6 @@ public abstract class Estrutura {
 
 	protected abstract String getDescricaoEstrutura();
 
-	protected abstract int quantidadePersonagensSuportada();
+	protected abstract int getQuantidadeMaximaTripulantes();
 
 }
